@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1f6feb">
+  <meta name="description" content="Démarrer et arrêter les environnements Jelastic depuis un téléphone.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Jelastic">
+  <title>Jelastic Control</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Jelastic Control</h1>
+    <div class="topbar-actions">
+      <button id="btn-refresh" class="icon-btn" title="Actualiser" aria-label="Actualiser" hidden>⟳</button>
+      <button id="btn-settings" class="icon-btn" title="Réglages" aria-label="Réglages">⚙</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Connexion / réglages -->
+    <section id="view-settings" class="card" hidden>
+      <h2>Connexion</h2>
+      <form id="settings-form" autocomplete="off">
+        <label>Hôte de l'API
+          <input id="f-host" type="url" required placeholder="https://app.jpc.infomaniak.com">
+        </label>
+        <p class="hint">Hôte du tableau de bord Jelastic (l'API répond sous <code>/1.0/</code>),
+          ou l'URL d'un proxy si le navigateur refuse l'appel direct (CORS).</p>
+
+        <fieldset class="seg">
+          <label><input type="radio" name="auth" value="token" checked> Jeton d'accès</label>
+          <label><input type="radio" name="auth" value="password"> Identifiant / mot de passe</label>
+        </fieldset>
+
+        <div id="auth-token">
+          <label>Jeton
+            <input id="f-token" type="password" placeholder="Settings › Access Tokens">
+          </label>
+          <p class="hint">Recommandé : fonctionne avec le 2FA et se révoque à tout moment.
+            Portée minimale : <code>environment/control/GetEnvs</code>, <code>StartEnv</code>, <code>StopEnv</code>.</p>
+        </div>
+        <div id="auth-password" hidden>
+          <label>Identifiant
+            <input id="f-login" type="email" autocomplete="username">
+          </label>
+          <label>Mot de passe
+            <input id="f-password" type="password" autocomplete="current-password">
+          </label>
+          <p class="hint">Le mot de passe n'est pas conservé : seule la session renvoyée par Jelastic l'est.
+            Ne passe pas si le 2FA est actif.</p>
+        </div>
+
+        <div class="row">
+          <button type="submit" class="btn primary">Se connecter</button>
+          <button type="button" id="btn-logout" class="btn" hidden>Se déconnecter</button>
+        </div>
+        <p id="settings-error" class="error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <!-- Liste des environnements -->
+    <section id="view-envs" hidden>
+      <div class="toolbar">
+        <input id="f-filter" type="search" placeholder="Filtrer…" aria-label="Filtrer les environnements">
+        <span id="last-update" class="muted"></span>
+      </div>
+      <p id="envs-error" class="error" role="alert" hidden></p>
+      <ul id="env-list" class="env-list"></ul>
+      <p id="envs-empty" class="muted center" hidden>Aucun environnement.</p>
+    </section>
+  </main>
+
+  <dialog id="confirm">
+    <form method="dialog">
+      <p id="confirm-text"></p>
+      <div class="row end">
+        <button value="cancel" class="btn">Annuler</button>
+        <button value="ok" id="confirm-ok" class="btn danger">Confirmer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <template id="env-item">
+    <li class="env">
+      <div class="env-head">
+        <span class="dot"></span>
+        <div class="env-titles">
+          <strong class="env-name"></strong>
+          <a class="env-domain" target="_blank" rel="noopener"></a>
+        </div>
+        <span class="badge"></span>
+      </div>
+      <div class="env-meta muted"></div>
+      <div class="env-actions">
+        <button class="btn primary act-start">Démarrer</button>
+        <button class="btn danger act-stop">Arrêter</button>
+      </div>
+    </li>
+  </template>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
